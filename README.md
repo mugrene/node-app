@@ -32,7 +32,7 @@ terraform apply -auto-approve
 3. Run the Ansible playbook to join workers and deploy the app:
 
 ```bash
-cd /home/d-code/Documents/mugrene
+cd /opt/node-app
 ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -u ubuntu --private-key /path/to/your/ssh_key
 ```
 
