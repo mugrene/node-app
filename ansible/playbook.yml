@@ -1,0 +1,79 @@
+- name: Get microk8s join command from control plane
+  hosts: control
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Run microk8s add-node and capture output
+      command: microk8s add-node
+      register: addnode
+
+    - name: Extract join command
+      set_fact:
+        join_cmd: "{{ addnode.stdout | regex_search('microk8s join\\S.*', '\\0') }}"
+
+    - name: Publish join command as a temporary host
+      add_host:
+        name: joininfo
+        join_cmd: "{{ join_cmd }}"
+
+- name: Join workers to the microk8s cluster
+  hosts: workers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Wait for snap to be available
+      command: snap --version
+      register: snap_out
+      retries: 12
+      delay: 5
+      until: snap_out.rc == 0
+
+    - name: Run microk8s join on worker (using join command from control)
+      shell: "{{ hostvars['joininfo'].join_cmd }}"
+      args:
+        warn: false
+
+- name: Deploy mugrene/node-app on the cluster from control plane
+  hosts: control
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Create Kubernetes manifest for mugrene/node-app
+      copy:
+        dest: /tmp/mugrene-deploy.yml
+        content: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mugrene-node-app
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: mugrene-node
+            template:
+              metadata:
+                labels:
+                  app: mugrene-node
+              spec:
+                containers:
+                - name: node-app
+                  image: mugrene/node-app
+                  ports:
+                  - containerPort: 3000
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: mugrene-node-svc
+          spec:
+            selector:
+              app: mugrene-node
+            type: NodePort
+            ports:
+            - port: 3000
+              targetPort: 3000
+              nodePort: 30080
+
+    - name: Apply Kubernetes manifest using microk8s kubectl
+      command: microk8s kubectl apply -f /tmp/mugrene-deploy.yml
