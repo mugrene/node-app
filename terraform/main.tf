@@ -13,16 +13,16 @@ terraform {
 
 provider "multipass" {}
 
-# --- 1. Generate SSH Key Pair ---
-# This solves the "missing private key" issue by creating one on the fly.
+# --- 1. Generate a New SSH Key Pair ---
+# This ensures you never get a "missing private key" error.
 resource "tls_private_key" "vm_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
-# --- 2. Define Cloud-Init Content ---
+# --- 2. Define the Cloud-Init Config ---
 locals {
-  cloud_init_config = <<-EOT
+  user_data = <<-EOT
     #cloud-config
     users:
       - default
@@ -33,42 +33,44 @@ locals {
     package_update: true
     packages:
       - curl
+      - git
   EOT
 }
 
 # --- 3. Control Plane VM ---
 resource "multipass_instance" "control_plane" {
-  name      = "k8s-control-plane"
-  image     = "noble" # Ubuntu 24.04
-  cpus      = 2
-  memory    = "2GiB"
-  disk      = "15GiB"
-  cloudinit = local.cloud_init_config # Correct attribute name for v1.4.3
+  name       = "k8s-control-plane"
+  image      = "noble" # Ubuntu 24.04
+  cpus       = 2
+  memory     = "2GiB"
+  disk       = "15GiB"
+  cloud_init = local.user_data  # Changed from cloudinit to cloud_init
 }
 
 # --- 4. Worker Nodes ---
 resource "multipass_instance" "workers" {
-  count     = 2
-  name      = "k8s-worker-${count.index + 1}"
-  image     = "noble"
-  cpus      = 2
-  memory    = "2GiB"
-  disk      = "10GiB"
-  cloudinit = local.cloud_init_config
+  count      = 2
+  name       = "k8s-worker-${count.index + 1}"
+  image      = "noble"
+  cpus       = 2
+  memory     = "2GiB"
+  disk       = "10GiB"
+  cloud_init = local.user_data  # Changed from cloudinit to cloud_init
 }
 
-# --- 5. Outputs ---
+# --- 5. Save the Private Key locally ---
+# This creates the file you'll use to SSH into the VMs.
+resource "local_sensitive_file" "ssh_key" {
+  content         = tls_private_key.vm_key.private_key_pem
+  filename        = "${path.module}/id_rsa_multipass"
+  file_permission = "0600"
+}
+
+# --- 6. Outputs ---
 output "control_plane_ip" {
   value = multipass_instance.control_plane.ipv4
 }
 
 output "worker_ips" {
   value = multipass_instance.workers[*].ipv4
-}
-
-# Save the generated private key to a file so you can use it to SSH
-resource "local_sensitive_file" "private_key" {
-  content         = tls_private_key.vm_key.private_key_pem
-  filename        = "${path.module}/id_rsa_multipass"
-  file_permission = "0600"
 }
