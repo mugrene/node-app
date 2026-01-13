@@ -1,35 +1,56 @@
-variable "worker1_name" {
-  default = "WORKER1-vm1"
-}
-
-variable "worker1_ip" {
-  default = "10.188.55.130"
-}
-
-variable "worker2_name" {
-  default = "WORKER2-vm2"
-}
-
-variable "worker2_ip" {
-  default = "10.188.55.18"
-}
-
-resource "null_resource" "create_worker1" {
-  provisioner "local-exec" {
-    command = "multipass launch 24.04 --name ${var.worker1_name} --cpus 2 --mem 2G --disk 10G --cloud-init /home/d-code/Documents/mugrene/terraform/cloud-init-worker1.yaml"
+terraform {
+  required_providers {
+    multipass = {
+      source  = "todoroff/multipass"
+      version = "~> 1.5.0"
+    }
   }
 }
 
-resource "null_resource" "create_worker2" {
-  provisioner "local-exec" {
-    command = "multipass launch 24.04 --name ${var.worker2_name} --cpus 2 --mem 2G --disk 10G --cloud-init /home/d-code/Documents/mugrene/terraform/cloud-init-worker2.yaml"
-  }
+provider "multipass" {}
+
+# --- Control Plane VM ---
+resource "multipass_instance" "control_plane" {
+  name   = "k8s-control-plane"
+  image  = "noble" # Ubuntu 24.04 LTS
+  cpus   = 2
+  memory = "2G"
+  disk   = "15G" # Increased slightly for 24.04 overhead
+
+  cloud_init = <<-EOT
+    #cloud-config
+    package_update: true
+    packages:
+      - curl
+      - apt-transport-https
+      - ca-certificates
+    runcmd:
+      - echo "Control Plane (Noble) Initialized" > /tmp/status
+  EOT
 }
 
-output "worker1_name" {
-  value = var.worker1_name
+# --- Worker Nodes ---
+resource "multipass_instance" "workers" {
+  count  = 2
+  name   = "k8s-worker-${count.index + 1}"
+  image  = "noble" # Ubuntu 24.04 LTS
+  cpus   = 2
+  memory = "2G"
+  disk   = "10G"
+
+  cloud_init = <<-EOT
+    #cloud-config
+    package_update: true
+    runcmd:
+      - echo "Worker Node ${count.index + 1} (Noble) Initialized" > /tmp/status
+  EOT
 }
 
-output "worker2_name" {
-  value = var.worker2_name
+# --- Outputs ---
+output "control_plane_ip" {
+  value = multipass_instance.control_plane.ipv4
+}
+
+output "worker_ips" {
+  value = multipass_instance.workers[*].ipv4
 }
