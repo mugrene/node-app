@@ -1,4 +1,4 @@
-# Automate K3s Cluster Setup on Multipass using Ansible (MacBook)
+# Automate K3s Cluster Setup on Multipass using Ansible (Ubuntu 24.04)
 
 This Ansible playbook automates the creation of a lightweight K3s Kubernetes cluster on Multipass using your MacBook.
 It provisions one master node and three worker nodes, installs K3s, and configures your local kubeconfig automatically.
@@ -14,56 +14,39 @@ Tear down and recreate the cluster anytime by simply rerunning the playbook
 | Node Name       | vCPU | RAM | Disk | Role   |
 | --------------- | ---- | --- | ---- | ------ |
 | `k3s-master`    | 2    | 4GB | 20GB | Master |
-| `k3s-worker-01` | 1    | 1GB | 4GB  | Worker |
-| `k3s-worker-02` | 1    | 1GB | 4GB  | Worker |
-| `k3s-worker-03` | 1    | 1GB | 4GB  | Worker |
+| `k3s-worker-1`  | 1    | 1GB | 4GB  | Worker |
+| `k3s-worker-2`  | 1    | 1GB | 4GB  | Worker |
+| `k3s-worker-3`  | 1    | 1GB | 4GB  | Worker |
 
 
 ### Prerequisites
 
-Before you begin, make sure you have the following installed on your MacBook:
-
-```bash
-brew install --cask multipass
-```
-
-```bash
-brew install ansible
-```
-
-```bash
-brew install kubectl
-```
-
 ### Clone the repository
 
 ```bash
-git clone https://github.com/gerardpontino/k3s-clustersetup-automation-macbook.git
-cd k3s-clustersetup-automation-macbook/
+git clone https://github.com/mugrene/node-app.git
+cd node-app
+```
+### Run install prequiste
+
+```bash
+chmod +x setup.sh
+```
+
+```bash
+./setup.sh
+```
+
+### Run the deployment script
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
 ```
 ### Update configuration (optional)
 
 If you want to modify node specs, names, or counts, update the variables in your playbooks or inventory file.
 
-### Run the Ansible playbook
-
-```bash
-ansible-playbook -i inventory.yml automate_k3s_provisioning.yaml
-```
-
-This playbook performs the following steps automatically:
-
-- Deletes any existing k3s-master or k3s-worker-* instances (for a clean start)
-
-- Creates one master and three worker nodes on Multipass
-
-- Installs K3s on the master and joins worker nodes to the cluster
-
-- Retrieves and updates your local kubeconfig file (~/.kube/config)
-
-- Displays your K3s cluster node information
-
-You can rerun this playbook anytime to delete and rebuild your cluster — perfect for a fresh lab environment or repeated practice runs.
 
 ### Validate the Setup
 
@@ -88,10 +71,6 @@ k3s-worker-3            Running           192.168.64.97    Ubuntu 24.04 LTS
                                           10.42.3.0
 ```
 
-You should see all instances in a Running state.
-Below is an example screenshot of the Multipass instances list:
-
-<img width="1396" height="559" alt="Screenshot 2025-10-21 at 10 23 31 PM" src="https://github.com/user-attachments/assets/96aeab2b-6e45-499e-8ded-6149550bc775" />
 
 ### Accessing the Cluster
 
@@ -109,7 +88,7 @@ k3s-worker-2   Ready    <none>                 18m   v1.33.5+k3s1
 k3s-worker-3   Ready    <none>                 17m   v1.33.5+k3s1
 ```
 
->Easily recreate a clean, ready-to-use K3s lab anytime — perfect for testing, learning, and automation practice. Enjoy!
+> That is it. Enjoy!
 
 
 
