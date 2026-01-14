@@ -1,6 +1,6 @@
 # Automate K3s Cluster Setup on Multipass using Terraform and Ansible (Ubuntu 24.04)
 
-This Ansible playbook automates the creation of a lightweight K3s Kubernetes cluster on Multipass using your MacBook.
+This Ansible playbook automates the creation of a lightweight K3s Kubernetes cluster on Multipass using your Ubuntu 24.04.
 It provisions one master node and three worker nodes, installs K3s, and configures your local kubeconfig automatically.
 
 Tear down and recreate the cluster anytime by simply rerunning the playbook
