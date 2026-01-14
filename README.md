@@ -7,7 +7,7 @@ Tear down and recreate the cluster anytime by simply rerunning the playbook
 
 | Node Name       | vCPU | RAM | Disk  | Role   |
 | --------------- | ---- | --- | ----  | ------ |
-| `k3s-master`    | 2    | 2GB | 20GB  | Master |
+| `k3s-master`    | 2    | 2GB | 10GB  | Master |
 | `k3s-worker-1`  | 1    | 1GB | 10GB  | Worker |
 | `k3s-worker-2`  | 1    | 1GB | 10GB  | Worker |
 | `k3s-worker-3`  | 1    | 1GB | 10GB  | Worker |
