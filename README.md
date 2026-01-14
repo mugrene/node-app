@@ -1,41 +1,117 @@
-# Multipass + MicroK8s (Terraform + Ansible) — quick guide
+# Automate K3s Cluster Setup on Multipass using Ansible (MacBook)
 
-This workspace provides a simple Terraform + Ansible setup to create two Multipass worker VMs and deploy the Docker image `mugrene/node-app` to a MicroK8s control plane at IP `10.188.55.1`.
+This Ansible playbook automates the creation of a lightweight K3s Kubernetes cluster on Multipass using your MacBook.
+It provisions one master node and three worker nodes, installs K3s, and configures your local kubeconfig automatically.
 
-Files added:
-- `terraform/main.tf` — launches two Multipass VMs using `multipass launch` (via `local-exec`).
-- `terraform/cloud-init-worker1.yaml` and `cloud-init-worker2.yaml` — simple cloud-init to install `microk8s` snap.
-- `ansible/inventory.ini` — inventory listing control and worker IPs.
-- `ansible/playbook.yml` — playbook that retrieves the `microk8s` join command from the control plane, runs it on workers, and deploys `mugrene/node-app`.
+This setup is perfect if you want to:
 
-Prerequisites
-- `multipass` installed and configured on the host.
-- `terraform` installed.
-- `ansible` installed.
-- Ensure the control plane (MicroK8s) is already running on 10.188.55.1.
+Practice Kubernetes use cases or few certification labs (CKA, CKAD, CKS)
 
-Notes about networking and IPs
-- Multipass instances by default use NAT; assigning static, host-reachable IPs typically requires host-side bridged networking or additional network setup. The cloud-init files included install microk8s inside the VMs but do not force a host-visible static address.
+Quickly spin up a fresh K3s environment for testing
 
-Quick run
+Tear down and recreate the cluster anytime by simply rerunning the playbook
 
-1. Create the worker VMs (this runs `multipass launch`):
+| Node Name       | vCPU | RAM | Disk | Role   |
+| --------------- | ---- | --- | ---- | ------ |
+| `k3s-master`    | 2    | 4GB | 20GB | Master |
+| `k3s-worker-01` | 1    | 1GB | 4GB  | Worker |
+| `k3s-worker-02` | 1    | 1GB | 4GB  | Worker |
+| `k3s-worker-03` | 1    | 1GB | 4GB  | Worker |
 
-```bash
-cd terraform
-terraform init
-terraform apply -auto-approve
-```
 
-2. Confirm the VMs exist with `multipass list` and ensure SSH connectivity / IP reachability.
+### Prerequisites
 
-3. Run the Ansible playbook to join workers and deploy the app:
+Before you begin, make sure you have the following installed on your MacBook:
 
 ```bash
-cd /opt/node-app
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -u ubuntu --private-key /path/to/your/ssh_key
+brew install --cask multipass
 ```
 
-If you use Multipass-managed SSH keys, you can extract the SSH key or use `multipass exec` to run commands inside the instances.
+```bash
+brew install ansible
+```
 
-If you want me to adapt this to a real Terraform Multipass provider (instead of `local-exec`) or make the playbook install microk8s via Ansible rather than cloud-init, tell me which option you prefer and I will update the files.
+```bash
+brew install kubectl
+```
+
+### Clone the repository
+
+```bash
+git clone https://github.com/gerardpontino/k3s-clustersetup-automation-macbook.git
+cd k3s-clustersetup-automation-macbook/
+```
+### Update configuration (optional)
+
+If you want to modify node specs, names, or counts, update the variables in your playbooks or inventory file.
+
+### Run the Ansible playbook
+
+```bash
+ansible-playbook -i inventory.yml automate_k3s_provisioning.yaml
+```
+
+This playbook performs the following steps automatically:
+
+- Deletes any existing k3s-master or k3s-worker-* instances (for a clean start)
+
+- Creates one master and three worker nodes on Multipass
+
+- Installs K3s on the master and joins worker nodes to the cluster
+
+- Retrieves and updates your local kubeconfig file (~/.kube/config)
+
+- Displays your K3s cluster node information
+
+You can rerun this playbook anytime to delete and rebuild your cluster — perfect for a fresh lab environment or repeated practice runs.
+
+### Validate the Setup
+
+After the playbook completes, you can validate that all your VMs are running in Multipass:
+
+```bash
+multipass list
+```
+
+Example output:
+```bash
+─❯ multipass list
+Name                    State             IPv4             Image
+k3s-master              Running           192.168.64.94    Ubuntu 24.04 LTS
+                                          10.42.0.0
+                                          10.42.0.1
+k3s-worker-1            Running           192.168.64.95    Ubuntu 24.04 LTS
+                                          10.42.1.0
+k3s-worker-2            Running           192.168.64.96    Ubuntu 24.04 LTS
+                                          10.42.2.0
+k3s-worker-3            Running           192.168.64.97    Ubuntu 24.04 LTS
+                                          10.42.3.0
+```
+
+You should see all instances in a Running state.
+Below is an example screenshot of the Multipass instances list:
+
+<img width="1396" height="559" alt="Screenshot 2025-10-21 at 10 23 31 PM" src="https://github.com/user-attachments/assets/96aeab2b-6e45-499e-8ded-6149550bc775" />
+
+### Accessing the Cluster
+
+After the setup finishes, you can check your cluster status using:
+
+```bash
+kubectl get nodes
+```
+
+```bash
+NAME           STATUS   ROLES                  AGE   VERSION
+k3s-master     Ready    control-plane,master   18m   v1.33.5+k3s1
+k3s-worker-1   Ready    <none>                 18m   v1.33.5+k3s1
+k3s-worker-2   Ready    <none>                 18m   v1.33.5+k3s1
+k3s-worker-3   Ready    <none>                 17m   v1.33.5+k3s1
+```
+
+>Easily recreate a clean, ready-to-use K3s lab anytime — perfect for testing, learning, and automation practice. Enjoy!
+
+
+
+
+
