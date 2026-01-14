@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -34,6 +38,7 @@ locals {
     packages:
       - curl
       - git
+      - apt-transport-https
   EOT
 }
 
@@ -44,6 +49,7 @@ resource "multipass_instance" "control_plane" {
   cpus       = 2
   memory     = "2GiB"
   disk       = "15GiB"
+  cloudinit  = local.user_data
 }
 
 # --- 4. Worker Nodes ---
@@ -54,6 +60,7 @@ resource "multipass_instance" "workers" {
   cpus       = 2
   memory     = "2GiB"
   disk       = "10GiB"
+  cloudinit  = local.user_data
 }
 
 # --- 5. Save the Private Key locally ---
