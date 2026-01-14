@@ -44,7 +44,6 @@ resource "multipass_instance" "control_plane" {
   cpus       = 2
   memory     = "2GiB"
   disk       = "15GiB"
-  cloud_init = local.user_data  # Changed from cloudinit to cloud_init
 }
 
 # --- 4. Worker Nodes ---
@@ -55,7 +54,6 @@ resource "multipass_instance" "workers" {
   cpus       = 2
   memory     = "2GiB"
   disk       = "10GiB"
-  cloud_init = local.user_data  # Changed from cloudinit to cloud_init
 }
 
 # --- 5. Save the Private Key locally ---
