@@ -16,9 +16,9 @@ ansible-playbook -i inventory.yml automate_k3s_provisioning.yaml
 cd ..
 
 cd k8s
-kubectl apply -f k8s/nginx-rtmp-deployment.yaml
-kubectl apply -f k8s/nginx-rtmp-service.yaml
-kubectl create deployment nginx --image=nginx
+kubectl apply -f deployment.yaml
+kubectl apply -f deploymentservice.yaml
+cd ..
 
 kubectl get deployments
 kubectl get pods
