@@ -1,22 +1,16 @@
-# Automate K3s Cluster Setup on Multipass using Ansible (Ubuntu 24.04)
+# Automate K3s Cluster Setup on Multipass using Terraform and Ansible (Ubuntu 24.04)
 
 This Ansible playbook automates the creation of a lightweight K3s Kubernetes cluster on Multipass using your MacBook.
 It provisions one master node and three worker nodes, installs K3s, and configures your local kubeconfig automatically.
 
-This setup is perfect if you want to:
-
-Practice Kubernetes use cases or few certification labs (CKA, CKAD, CKS)
-
-Quickly spin up a fresh K3s environment for testing
-
 Tear down and recreate the cluster anytime by simply rerunning the playbook
 
-| Node Name       | vCPU | RAM | Disk | Role   |
-| --------------- | ---- | --- | ---- | ------ |
-| `k3s-master`    | 2    | 4GB | 20GB | Master |
-| `k3s-worker-1`  | 1    | 1GB | 4GB  | Worker |
-| `k3s-worker-2`  | 1    | 1GB | 4GB  | Worker |
-| `k3s-worker-3`  | 1    | 1GB | 4GB  | Worker |
+| Node Name       | vCPU | RAM | Disk  | Role   |
+| --------------- | ---- | --- | ----  | ------ |
+| `k3s-master`    | 2    | 2GB | 20GB  | Master |
+| `k3s-worker-1`  | 1    | 1GB | 10GB  | Worker |
+| `k3s-worker-2`  | 1    | 1GB | 10GB  | Worker |
+| `k3s-worker-3`  | 1    | 1GB | 10GB  | Worker |
 
 
 ### Prerequisites
