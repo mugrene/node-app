@@ -1,0 +1,3 @@
+all:
+  vars:
+    worker_count: 3  # Number of worker nodes
