@@ -28,6 +28,9 @@ kubectl get services
 
 kubectl get all --all-namespaces
 
+echo "=== Deployment completed successfully ==="
+echo "=== Test the deployed service ==="
+
 # Replace <pod-name> with the name from the previous step
 # kubectl exec -it nginx-66686b6766-dxgmb -- /bin/bash
 # curl http://localhost:3000
