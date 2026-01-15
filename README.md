@@ -81,6 +81,16 @@ k3s-worker-1   Ready    <none>                 18m   v1.33.5+k3s1
 k3s-worker-2   Ready    <none>                 18m   v1.33.5+k3s1
 k3s-worker-3   Ready    <none>                 17m   v1.33.5+k3s1
 ```
+###  Monitoring the cluster
+Install Prometheus & Grafana for monitoring the health of the cluster
+
+```bash
+chmod +x install_monitoring.sh
+./install_monitoring.sh
+```
+
+from the browser the prometheus will be accessible on http://<control plane ip address:9090>
+and grafana will be accessible on http://<control plane ip address:3000>
 
 > That is it. Enjoy!
 
