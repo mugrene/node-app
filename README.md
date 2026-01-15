@@ -89,8 +89,8 @@ chmod +x install_monitoring.sh
 ./install_monitoring.sh
 ```
 
-from the browser the prometheus will be accessible on http://<control plane ip address:9090>
-and grafana will be accessible on http://<control plane ip address:3000>
+from the browser the prometheus will be accessible on http://control plane ip address:9090
+and grafana will be accessible on http://control plane ip address:3000
 
 > That is it. Enjoy!
 
